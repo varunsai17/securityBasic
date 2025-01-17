@@ -3,3 +3,30 @@
 userDetailsService -- this class should contain
                        data(in case you don't have any db)  or
                        way to retreive data from the database.
+
+QQQ) Do I Need to Explicitly Store Roles and Authorities as (Role_User , Role_Admin) or (user , admin) is enought?
+A) No, User and Admin is enough,Because look at the below code of MyCustomUserDetailsServiceClass
+---------------------------------------------------------------------------------------
+UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUserId())
+                .password(user.getPassword())
+                .roles(user.getRole())
+                .build();
+----------------------------------------------------------------------------------------
+In the below class even thought user.getRole() is admin ,It is stored in userDetails object as Role_admin so you
+don't need to explicitly mention it as a role.
+
+QQQ) What is the most important object in Spring security????????????????????????????????
+A) Authentication Object. Since putting that object SecurityContext proves the authentication of user
+this object contains 3 fields i) principal ii)credentials iii)authorities
+UserDetails contains 3 fields ii)username ii) password iii)authorities
+both are more or less the same.
+so , it's better to form object of Authentication Interface (UsernamePasswordAuthenticationToken is it's implementation) using UserDetail object.
+as it prefixes roles with "Role_"
+
+
+QQQ) What are the flows of authentication ???.........................................................
+A) There are 2 flows
+    i) Login Authentication using Endpoint (intially)
+    ii) JWT Authentication (After Intial Login)
+

@@ -1,5 +1,6 @@
 package com.example.springsecuritystarter.configuration;
 
+import com.example.springsecuritystarter.filters.JwtFilter;
 import com.example.springsecuritystarter.service.MyCustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 
 @Configuration
 public class SecurityConfiguration {
@@ -22,15 +25,23 @@ public class SecurityConfiguration {
     @Autowired
     UserDetailsService userDetailsService;
 
+    @Autowired
+    private JwtFilter jwtFilter ;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity.authorizeHttpRequests(requests -> {
-            requests.requestMatchers("/hi", "/bye").permitAll();
+        httpSecurity.
+                cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.disable())
+                        .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable()).
+                authorizeHttpRequests(requests -> {
+            requests.requestMatchers("/hi", "/bye","/login/**").permitAll();
             requests.requestMatchers("user/**").hasRole("user");
             requests.requestMatchers("admin/**").hasRole("admin");
             requests.anyRequest().authenticated();
-        }).formLogin(AbstractAuthenticationFilterConfigurer::permitAll).
-        build();
+        });
+                httpSecurity.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return httpSecurity.build();
     }
 
 
